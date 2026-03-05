@@ -31,8 +31,6 @@ Keithley 2450 I-V Studio is a Python/tkinter desktop application for instrument-
 
 > Output Curve — Id vs Vds with Q-Point load line overlay
 
-(Add screenshots to the repository and update these links)
-
 ---
 
  System Requirements
