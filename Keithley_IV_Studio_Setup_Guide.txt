@@ -1,0 +1,309 @@
+================================================================================
+        KEITHLEY 2450 — I-V STUDIO
+        COMPLETE SETUP & INSTALLATION GUIDE
+        Developed by Rangaraajan Muralidaran
+================================================================================
+        Document Date : 05 March 2026
+        Application   : Keithley 2450 I-V Studio v3.0
+        File          : keithley_pro.py / IV_Studio.exe
+================================================================================
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 1 — SYSTEM REQUIREMENTS
+────────────────────────────────────────────────────────────────────────────────
+
+  Operating System   : Windows 10 or Windows 11 (64-bit only)
+  Python Version     : Python 3.9 or later
+  Display            : 1280 × 720 minimum  |  1920 × 1080 recommended
+  RAM                : 4 GB minimum
+  USB Port           : USB Type-A (for instrument connection)
+
+  Instrument Requirements:
+    - Keithley 2450 SMU (firmware 1.7.0 or later)
+    - For FET mode: Second Keithley 2450 + TSP-Link RJ-45 cable
+
+--------------------------------------------------------------------------------
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 2 — STEP 1 : INSTALL NI-VISA RUNTIME (HARDWARE DRIVER)
+────────────────────────────────────────────────────────────────────────────────
+
+  The NI-VISA runtime is the low-level driver that allows your PC to
+  communicate with the Keithley 2450 over USB. This must be installed
+  BEFORE connecting the instrument.
+
+  DOWNLOAD:
+    URL  : https://www.ni.com/en/support/downloads/drivers/download
+           .ni-visa.html
+    File : NI-VISA 2024 Q1 (or latest available)
+    Size : approximately 600 MB
+
+  INSTALLATION STEPS:
+    1. Run the downloaded installer (e.g. NI-VISA_2024Q1_Win.exe)
+    2. Accept the licence agreement
+    3. Choose "Complete" installation when prompted
+    4. Allow the installer to install NI Package Manager if asked
+    5. Restart your PC when the installer finishes
+
+  ALTERNATIVE (Keysight):
+    If you prefer a lighter install, Keysight IO Libraries Suite also
+    provides a compatible VISA runtime:
+    URL : https://www.keysight.com/find/iosuitedownload
+
+  VERIFY INSTALLATION:
+    After restarting, open NI-MAX (National Instruments Measurement
+    and Automation Explorer) from the Start menu.
+    Connect the Keithley 2450 via USB — it should appear under
+    "Devices and Interfaces" with a resource string like:
+      USB0::0x05E6::0x2450::04465297::INSTR
+    Copy this string exactly — you will need it in the application.
+
+--------------------------------------------------------------------------------
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 3 — STEP 2 : INSTALL PYTHON
+────────────────────────────────────────────────────────────────────────────────
+
+  Skip this section if Python 3.9 or later is already installed.
+
+  DOWNLOAD:
+    URL  : https://www.python.org/downloads/
+    File : Python 3.12.x Windows installer (64-bit)
+
+  INSTALLATION STEPS:
+    1. Run the installer
+    2. IMPORTANT: Tick "Add Python to PATH" at the bottom of the
+       first screen before clicking Install Now
+    3. Click "Install Now"
+    4. Click "Disable path length limit" if prompted at the end
+
+  VERIFY INSTALLATION:
+    Open Command Prompt or PowerShell and type:
+      python --version
+    Expected output: Python 3.12.x  (or similar 3.9+)
+
+    Also verify pip is available:
+      pip --version
+
+--------------------------------------------------------------------------------
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 4 — STEP 3 : INSTALL PYTHON PACKAGES
+────────────────────────────────────────────────────────────────────────────────
+
+  Open Command Prompt (search "cmd" in Start menu) and run each
+  command below one at a time.
+
+  ── 4.1  pyvisa  ────────────────────────────────────────────────────────────
+    What it does : Python interface to the VISA layer — lets the
+                   script send commands to the Keithley over USB.
+
+    Command:
+      pip install pyvisa
+
+  ── 4.2  pyvisa-py (optional fallback backend)  ─────────────────────────────
+    What it does : Pure-Python VISA backend — useful if NI-VISA is
+                   not available on a machine.
+
+    Command:
+      pip install pyvisa-py
+
+  ── 4.3  numpy  ─────────────────────────────────────────────────────────────
+    What it does : Numerical arrays and mathematics — used for sweep
+                   point generation and Q-point gradient calculation.
+
+    Command:
+      pip install numpy
+
+  ── 4.4  matplotlib  ────────────────────────────────────────────────────────
+    What it does : Live plotting library — renders the I-V charts
+                   inside the application window.
+
+    Command:
+      pip install matplotlib
+
+  ── 4.5  Install all packages in one command  ────────────────────────────────
+    Alternatively, run everything at once:
+
+      pip install pyvisa pyvisa-py numpy matplotlib
+
+  ── 4.6  Verify all packages installed correctly  ────────────────────────────
+    Run the following in Command Prompt:
+
+      python -c "import pyvisa; import numpy; import matplotlib; print('All OK')"
+
+    Expected output: All OK
+
+--------------------------------------------------------------------------------
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 5 — STEP 4 : RUNNING THE APPLICATION (PYTHON SCRIPT)
+────────────────────────────────────────────────────────────────────────────────
+
+  1. Place keithley_pro.py in a permanent folder, e.g.:
+       C:\Users\YourName\Documents\keithley-iv-studio\
+
+  2. Connect the Keithley 2450 to your PC via USB
+
+  3. Open Command Prompt, navigate to the folder:
+       cd "C:\Users\YourName\Documents\keithley-iv-studio"
+
+  4. Run the application:
+       python keithley_pro.py
+
+  5. The application window opens. Enter your VISA address in the
+     header bar (obtained from NI-MAX — see Section 2).
+
+  NOTE: The data auto-save folder defaults to:
+    D:\KEITHLEY 2450\Data
+  Create this folder before running, or use Export CSV manually.
+  To change the default, edit line:
+    self.save_dir = r"D:\KEITHLEY 2450\Data"
+  in keithley_pro.py.
+
+--------------------------------------------------------------------------------
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 6 — STEP 5 : BUILDING A STANDALONE .EXE (OPTIONAL)
+────────────────────────────────────────────────────────────────────────────────
+
+  PyInstaller packages the Python script and all dependencies into a
+  single .exe file that can run on any Windows PC without Python
+  installed.
+
+  IMPORTANT: NI-VISA runtime must still be installed on the target
+  PC — PyInstaller cannot bundle hardware drivers.
+
+  ── 6.1  Install PyInstaller  ───────────────────────────────────────────────
+      pip install pyinstaller
+
+  ── 6.2  Build the .exe  ────────────────────────────────────────────────────
+    Navigate to the folder containing keithley_pro.py:
+      cd "C:\Users\YourName\Documents\keithley-iv-studio"
+
+    Run:
+      pyinstaller --onefile --windowed --name "IV_Studio" keithley_pro.py
+
+    Flags explained:
+      --onefile    : Bundles everything into one single .exe file
+      --windowed   : Suppresses the black console window behind the GUI
+      --name       : Sets the output filename
+
+  ── 6.3  With a custom icon  ────────────────────────────────────────────────
+    If you have an .ico file:
+      pyinstaller --onefile --windowed --name "IV_Studio"
+                  --icon="icon.ico" keithley_pro.py
+
+  ── 6.4  Find your .exe  ────────────────────────────────────────────────────
+    After the build completes (2–5 minutes), your .exe is at:
+      dist\IV_Studio.exe
+
+    The dist\ folder is the only thing you need to keep or share.
+    The build\ folder and IV_Studio.spec file can be deleted.
+
+  ── 6.5  First run note  ────────────────────────────────────────────────────
+    Windows Defender may show a warning the first time you run the
+    .exe because it is unsigned. Click "More info" → "Run anyway".
+    This is normal for unsigned Python applications.
+
+--------------------------------------------------------------------------------
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 7 — FET MODE : TSP-LINK DUAL-SMU SETUP
+────────────────────────────────────────────────────────────────────────────────
+
+  FET Characterisation mode requires two Keithley 2450 units connected
+  via TSP-Link. Follow these steps before pressing RUN in FET mode.
+
+  PHYSICAL CONNECTIONS:
+    Master SMU (Node 1) — Gate terminal  → Rear FORCE HI / FORCE LO
+    Slave  SMU (Node 2) — Drain terminal → Rear FORCE HI / FORCE LO
+    GNDU post           — Source terminal → Rear GNDU
+
+    TSP-Link cable: Connect the rear TSP-LINK RJ-45 port on both units.
+
+  SET NODE IDs ON EACH INSTRUMENT:
+    On MASTER unit front panel:
+      MENU → System → TSP-Link Node → Set to 1 → OK
+
+    On SLAVE unit front panel:
+      MENU → System → TSP-Link Node → Set to 2 → OK
+
+  VISA ADDRESS:
+    Only the Master (Node 1) VISA address is needed in the application.
+    The Slave is accessed automatically through TSP-Link.
+
+  VERIFY TSP-LINK:
+    On the Master front panel:
+      MENU → System → TSP-Link → Reset
+    Status should show "Online" with 1 node found.
+
+--------------------------------------------------------------------------------
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 8 — TROUBLESHOOTING
+────────────────────────────────────────────────────────────────────────────────
+
+  PROBLEM  : "pip is not recognised"
+  SOLUTION : Python not added to PATH during install. Reinstall Python
+             and tick "Add Python to PATH" on the first screen.
+
+  PROBLEM  : pyvisa finds no instruments / VISA error
+  SOLUTION : NI-VISA runtime not installed, or USB cable not connected.
+             Install NI-VISA (Section 2), reconnect USB, recheck
+             resource string in NI-MAX.
+
+  PROBLEM  : TSP-Link not online error in FET mode
+  SOLUTION : TSP-Link cable missing or Node IDs not set.
+             Set Node ID=1 on Master and Node ID=2 on Slave via the
+             front panel menu (Section 7).
+
+  PROBLEM  : Windows Defender blocks the .exe
+  SOLUTION : Click "More info" → "Run anyway". This is expected for
+             unsigned executables built with PyInstaller.
+
+  PROBLEM  : PyInstaller build fails with missing module error
+  SOLUTION : Run: pip install <missing_module_name>
+             Then rebuild with the pyinstaller command.
+
+  PROBLEM  : Auto-save fails / save directory warning
+  SOLUTION : Create the folder D:\KEITHLEY 2450\Data manually, or
+             edit self.save_dir in keithley_pro.py to a folder that
+             exists on your system.
+
+  PROBLEM  : Application window too small / controls clipped
+  SOLUTION : Minimum display resolution is 1280×720. Set Windows
+             display scaling to 100% for best results.
+
+--------------------------------------------------------------------------------
+
+
+────────────────────────────────────────────────────────────────────────────────
+SECTION 9 — QUICK COMMAND REFERENCE
+────────────────────────────────────────────────────────────────────────────────
+
+  Install all Python packages:
+    pip install pyvisa pyvisa-py numpy matplotlib
+
+  Run the application:
+    python keithley_pro.py
+
+  Build standalone .exe:
+    pyinstaller --onefile --windowed --name "IV_Studio" keithley_pro.py
+
+--------------------------------------------------------------------------------
+
+
+================================================================================
+  Developed by Rangaraajan Muralidaran
+  Keithley 2450 — I-V Studio  v3.0
+  Document Date: 05 March 2026
+================================================================================
