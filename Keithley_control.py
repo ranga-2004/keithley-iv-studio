@@ -4947,6 +4947,9 @@ class ModeSelector(tk.Toplevel):
         tk.Label(hdr, text="KEITHLEY  2450  —  Lab View",
                  bg="#0D1117", fg="#E6EDF3",
                  font=("Segoe UI", 22, "bold")).pack()
+        tk.Label(hdr, text="Developed by Rangaraajan Muralidaran",
+                bg="#0D1117", fg="#E6EDF3",
+                font=("Segoe UI", 15, "bold")).pack()
         tk.Label(hdr, text="Select measurement mode to continue",
                  bg="#0D1117", fg="#58A6FF",
                  font=("Segoe UI", 11)).pack(pady=(6, 0))
@@ -5032,6 +5035,7 @@ class DMMWindow(tk.Toplevel):
         self.rm=pyvisa.ResourceManager(); self.inst=None
         self._running=False; self._after_id=None
         self._hold=False; self._min=None; self._max=None
+        self._poll_errors=0   # consecutive poll failures
         self.addr_var  =tk.StringVar(value=_cfg.get("visa_address"))
         self.mode_var  =tk.StringVar(value="DCV")
         self.src_var   =tk.StringVar(value="0")
@@ -5190,16 +5194,29 @@ class DMMWindow(tk.Toplevel):
         addr=self.addr_var.get().strip()
         if not addr: self.status_var.set("● SMU: No address"); return
         try:
-            self.inst=self.rm.open_resource(addr); self.inst.timeout=8000
+            self.inst=self.rm.open_resource(addr)
+            self.inst.timeout=5000
+            # Verify the instrument actually responds before declaring connected
+            idn=self.inst.query("*IDN?").strip()
+            if not idn: raise RuntimeError("Instrument did not respond to *IDN?")
             self.inst.write("*RST"); time.sleep(0.3)
+            self.inst.timeout=8000
             self._running=True
+            self._poll_errors=0
             self._connect_btn.config(text="■  Disconnect",bg=_THEME["DANGER"])
-            self.status_var.set("● SMU: Connected")
+            self.status_var.set(f"● SMU: Connected  —  {idn[:36]}")
             if hasattr(self,"_conn_lbl"): self._conn_lbl.config(fg=_THEME["SUCCESS"])
             _cfg.set("visa_address",addr)
             self._configure_inst(); self._poll()
         except Exception as e:
-            self.status_var.set(f"● SMU: Error")
+            err=str(e)
+            if "VI_ERROR_RSRC_NFOUND" in err or "not found" in err.lower():
+                msg="Instrument not found — check VISA address and cable"
+            elif "timeout" in err.lower() or "IDN" in err:
+                msg="Instrument found but not responding — check power and cable"
+            else:
+                msg=f"Connection failed: {err[:50]}"
+            self.status_var.set(f"● SMU: {msg}")
             if hasattr(self,"_conn_lbl"): self._conn_lbl.config(fg=_THEME["DANGER"])
             if self.inst:
                 try: self.inst.close()
@@ -5257,7 +5274,22 @@ class DMMWindow(tk.Toplevel):
                 except: pass
             self.status_var.set("● SMU: Connected")
             if hasattr(self,"_conn_lbl"): self._conn_lbl.config(fg=_THEME["SUCCESS"])
-        except Exception as e: self.status_var.set("● SMU: Read error")
+        except Exception as e:
+            self._poll_errors=getattr(self,"_poll_errors",0)+1
+            if self._poll_errors>=3:
+                self._running=False
+                self.status_var.set("● SMU: Disconnected — not responding")
+                if hasattr(self,"_conn_lbl"): self._conn_lbl.config(fg=_THEME["DANGER"])
+                self._connect_btn.config(text="►  Connect",bg=_THEME["SUCCESS"])
+                if self._after_id:
+                    try: self.after_cancel(self._after_id)
+                    except: pass
+                try:
+                    if self.inst: self.inst.close()
+                except: pass
+                self.inst=None; return
+            else:
+                self.status_var.set(f"● SMU: Read error ({self._poll_errors}/3)")
         if self._running: self._after_id=self.after(self._POLL_MS,self._poll)
 
     def _toggle_hold(self):
@@ -5345,8 +5377,21 @@ class DMMWindow(tk.Toplevel):
 # ═══════════════════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
+    import sys as _sys
+
+    def _resource(rel_path):
+        """Resolve resource path from source or PyInstaller EXE."""
+        base=getattr(_sys,"_MEIPASS",os.path.dirname(os.path.abspath(__file__)))
+        return os.path.join(base,rel_path)
+
     root = tk.Tk()
     root.withdraw()
+
+    # Set app icon (works from source and from PyInstaller EXE)
+    try:
+        root.iconbitmap(_resource("labview.ico"))
+    except Exception:
+        pass
 
     splash = SplashScreen(root)
     root.update()
