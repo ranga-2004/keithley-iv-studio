@@ -1,4 +1,4 @@
-# Keithley 2450 — Lab View
+# Keithley 2450 — Studio
 
 **Professional I-V Characterisation and FET Analysis Desktop Application**  
 Developed by Rangaraajan Muralidaran
