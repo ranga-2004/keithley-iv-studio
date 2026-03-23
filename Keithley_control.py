@@ -1,10 +1,10 @@
 """
-Keithley 2450 — Lab View
+Keithley 2450
 Professional measurement application for I-V characterisation and FET analysis.
 Author : Rangaraajan Muralidaran
-Version: 4.0  —  Cycling, bias stress, parameter extraction,
-                  measurement quality (averaging / settling / pre-check),
-                  ghost overlay, mean±σ band, cycle CSV export.
+Cycling, bias stress, parameter extraction,
+measurement quality (averaging / settling / pre-check),
+ghost overlay, mean±σ band, cycle CSV export.
 """
 
 import pyvisa
@@ -209,7 +209,7 @@ class StatusBar(tk.Frame):
         self._extra = tk.Label(self, text="", bg=_THEME["PANEL"], fg=_THEME["TEXT2"],
                                font=FONT_BODY, anchor="w")
         self._extra.pack(side="left", padx=4)
-        tk.Label(self, text="Keithley 2450 - Lab View  ·  Rangaraajan Muralidaran",
+        tk.Label(self, text="Keithley 2450 Studio ·  Rangaraajan Muralidaran",
                  bg=_THEME["PANEL"], fg=_THEME["TEXT3"], font=FONT_SM).pack(side="right", padx=12)
 
     def set(self, state, extra=""):
@@ -966,7 +966,7 @@ class KeithleyApp:
 
     def __init__(self, root):
         self.root = root
-        self.root.title("Keithley 2450 - Lab View")
+        self.root.title("Keithley 2450 - Studio")
         self.root.configure(bg=_THEME["BG"])
         self.root.minsize(1280, 720)
 
@@ -1300,7 +1300,7 @@ class KeithleyApp:
         logo_f = tk.Frame(hdr, bg=ACCENT); logo_f.pack(side="left", padx=14, pady=8)
         tk.Label(logo_f, text="KEITHLEY 2450", bg=ACCENT, fg="white",
                  font=FONT_H1).pack(anchor="w")
-        tk.Label(logo_f, text="Source Measure Unit  ·  Lab View",
+        tk.Label(logo_f, text="Source Measure Unit  ·  Studio",
                  bg=ACCENT, fg="#7EB6E0", font=FONT_SM).pack(anchor="w")
 
         self._conn_lbl = tk.Label(
@@ -2807,7 +2807,7 @@ class KeithleyApp:
         n_cyc = len(self._cycle_runs)
         with open(path, "w", newline="", encoding="utf-8-sig") as f:
             w = csv.writer(f)
-            w.writerow(["# Keithley 2450  Lab View"])
+            w.writerow(["# Keithley 2450  Studio"])
             w.writerow(["# Sample ID",  self.sample_id.get()])
             w.writerow(["# Date/Time",  time.strftime("%d/%m/%Y  %H:%M:%S")])
             w.writerow(["# Mode",       p["Mode"].get()])
@@ -2870,7 +2870,7 @@ class KeithleyApp:
             p = self.inputs
             with open(path, "w", newline="", encoding="utf-8-sig") as f:
                 w = csv.writer(f)
-                w.writerow(["# Keithley 2450  Lab View  —  Cycle Export"])
+                w.writerow(["# Keithley 2450  Studio  —  Cycle Export"])
                 w.writerow(["# Sample ID",  self.sample_id.get()])
                 w.writerow(["# Mode",       p["Mode"].get()])
                 w.writerow(["# Cycles",     len(self._cycle_runs)])
@@ -4691,7 +4691,7 @@ class FETWindow(tk.Toplevel):
               self._cycle_data[-1] if self._cycle_data else [])
         with open(path, "w", newline="", encoding="utf-8-sig") as f:
             w = csv.writer(f)
-            w.writerow(["# Keithley 2450  Lab View  —  FET Characterisation"])
+            w.writerow(["# Keithley 2450  Studio  —  FET Characterisation"])
             w.writerow(["# Mode", mode])
             for t in self.TERMINALS:
                 w.writerow([f"# {t}", self.v[t]["smu"].get(), self.v[t]["op"].get()])
@@ -4739,7 +4739,7 @@ class FETWindow(tk.Toplevel):
             x_col  = "Vg (V)" if is_xfr else "Vds (V)"
             with open(path, "w", newline="", encoding="utf-8-sig") as f:
                 w = csv.writer(f)
-                w.writerow(["# Keithley 2450  Lab View  —  Cycle Export"])
+                w.writerow(["# Keithley 2450  Studio  —  Cycle Export"])
                 w.writerow(["# Mode", mode])
                 w.writerow(["# Cycles", len(self._cycle_data)])
                 w.writerow(["# Date", time.strftime("%d/%m/%Y  %H:%M:%S")])
@@ -4792,7 +4792,7 @@ class FETWindow(tk.Toplevel):
                     mode   = self.mode_var.get()
                     is_xfr = "Transfer" in mode
                     x_col  = "Vg (V)" if is_xfr else "Vds (V)"
-                    w.writerow(["# Keithley 2450  Lab View  — Cycle Export"])
+                    w.writerow(["# Keithley 2450  Studio  — Cycle Export"])
                     w.writerow(["# Mode", mode])
                     w.writerow(["# Cycles", len(self._cycle_data)])
                     w.writerow(["# Date", time.strftime("%d/%m/%Y  %H:%M:%S")])
@@ -4853,7 +4853,7 @@ class SplashScreen(tk.Toplevel):
         tk.Label(body, text="KEITHLEY  2450",
                  bg="#0D1117", fg="#E6EDF3",
                  font=("Segoe UI", 20, "bold")).pack(anchor="w")
-        tk.Label(body, text="Source Measure Unit  ·  Lab View",
+        tk.Label(body, text="Source Measure Unit  ·  Studio",
                  bg="#0D1117", fg="#58A6FF",
                  font=("Segoe UI", 9)).pack(anchor="w", pady=(2, 0))
         tk.Label(body, text="by Rangaraajan Muralidaran",
@@ -4914,7 +4914,7 @@ class ModeSelector(tk.Toplevel):
         super().__init__(root)
         self._callback = callback
         self._on_quit  = on_quit
-        self.title("Keithley 2450 - Lab View")
+        self.title("Keithley 2450 - Studio")
         sw = root.winfo_screenwidth()
         sh = root.winfo_screenheight()
         self.geometry(f"{sw}x{sh}+0+0")
@@ -4932,7 +4932,7 @@ class ModeSelector(tk.Toplevel):
         top = tk.Frame(self, bg="#161B22"); top.pack(fill="x")
         tk.Frame(top, bg="#1F6FEB", height=4).pack(fill="x")
         quit_row = tk.Frame(top, bg="#161B22"); quit_row.pack(fill="x", padx=16, pady=6)
-        tk.Label(quit_row, text="KEITHLEY 2450  —  Lab View",
+        tk.Label(quit_row, text="KEITHLEY 2450  —  Studio",
                  bg="#161B22", fg="#484F58",
                  font=("Segoe UI", 9)).pack(side="left")
         tk.Button(quit_row, text="✕  Quit",
@@ -4944,7 +4944,7 @@ class ModeSelector(tk.Toplevel):
 
         hdr = tk.Frame(self, bg="#0D1117")
         hdr.pack(fill="x", pady=(30, 0))
-        tk.Label(hdr, text="KEITHLEY  2450  —  Lab View",
+        tk.Label(hdr, text="KEITHLEY  2450  —  Studio",
                  bg="#0D1117", fg="#E6EDF3",
                  font=("Segoe UI", 22, "bold")).pack()
         tk.Label(hdr, text="Developed by Rangaraajan Muralidaran",
